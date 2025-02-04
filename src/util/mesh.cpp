@@ -25,11 +25,11 @@ Mesh::~Mesh(){
 }
 
 void Mesh::GenerateMesh(){
-    for (int i = 0; i < sizeof(tempvertices) / sizeof(float); ++i){
+    for (int i = 0; i < (int)(sizeof(tempvertices) / sizeof(float)); ++i){
         vertices.push_back(tempvertices[i]);
         normals.push_back(i);
     }
-    for (int i = 0; i < sizeof(tempindices) / sizeof(unsigned int); ++i){
+    for (int i = 0; i < (int)(sizeof(tempindices) / sizeof(unsigned int)); ++i){
         indices.push_back(tempindices[i]);
     }
 
