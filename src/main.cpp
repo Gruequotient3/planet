@@ -35,6 +35,14 @@ float lastY;
 
 Camera camera = Camera();
 
+const unsigned int tempindices[] = {0, 1, 3, 3, 1, 2};
+
+const float tempvertices[] = {
+    -1, -1, -1,
+     1, -1, -1,
+     1,  1, -1,
+    -1,  1, -1,
+};
 
 int main(){
 
@@ -71,13 +79,25 @@ int main(){
 
     glViewport(0, 0, 800, 600);
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
+    //glEnable(GL_CULL_FACE);
 
 
     Shader shader = Shader("./res/shaders/shader.vert", "./res/shaders/shader.frag");
 
-    Mesh mesh;
-    mesh.GenerateMesh();
+    std::vector<Vertex> vertices;
+    std::vector<unsigned int> indices;
+    for (int i = 0; i < sizeof(tempindices) / sizeof(unsigned int); ++i){
+        indices.push_back(tempindices[i]);
+    }
+    for (int i = 0; i < sizeof(tempvertices) / sizeof(float) / 3; ++i){
+        Vertex vertex;
+        vertex.position = glm::vec3(tempvertices[i*3], tempvertices[i*3+1], tempvertices[i*3+2]);
+        vertex.normal = glm::vec3(0.0f, 0.0f, 0.0f);
+        vertex.texCoord = glm::vec2(0.0f, 0.0f);
+        vertices.push_back(vertex);
+    }
+
+    Mesh mesh {vertices, indices};
 
     // Hide Cursor
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
