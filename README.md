@@ -13,7 +13,7 @@ git submodule update --init --recursive
 make libs && make
 ```
 
-### Using
+## Using
 
 ```bash
 make
