@@ -2,44 +2,32 @@
 #define MESH_HPP
 
 #include <vector>
+#include <glm/glm.hpp>
 
 #include "../gfx/shader.hpp"
 
-const unsigned int tempindices[] = {1, 3, 0, 1, 2, 3};
 
-const float tempvertices[] = {
-    -1, -1, -1,
-     1, -1, -1,
-     1,  1, -1,
-    -1,  1, -1,
+struct Vertex{
+    glm::vec3 position;
+    glm::vec3 normal;
+    glm::vec2 texCoord;
 };
-
 
 class Mesh{
     private:
-        std::vector<float> normals;
-
-        // vertex information buffer
-        int bufvsize = 0;
-        float* bufv = NULL;
-
-        // indice buffer
-        int bufisize = 0;
-        unsigned int* bufi = NULL;
-
-        unsigned int vao, vbo, ebo;
+        unsigned int vao = 0;
+        unsigned int vbo = 0;
+        unsigned int ebo = 0;
 
     public:
-        std::vector<float> vertices;
+        std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
 
-        Mesh();
+        Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
         ~Mesh();
-
         void GenerateMesh();
-        void UpdateNormals();
-        void RecalculateNormals();
-        void Draw(Shader shader);
+        void Draw(Shader& shader);
 };
+
 
 #endif
