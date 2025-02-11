@@ -2,9 +2,6 @@
 #define SHADER_CPP
 
 
-
-#include <glad/glad.h>
-
 #include "shader.hpp"
 
 
@@ -95,6 +92,10 @@ void Shader::setFloat(const std::string &name, float value) const{
 
 void Shader::setInt(const std::string &name, int value) const{
     glUniform1i(glGetUniformLocation(id, name.c_str()), value);
+}
+
+void Shader::setVec3(const std::string &name, glm::vec3 value) const{
+    glUniform3f(glGetUniformLocation(id, name.c_str()), value.x, value.y, value.z);
 }
 
 void Shader::setMat4(const std::string &name, GLboolean transpose, const GLfloat *value) const{
