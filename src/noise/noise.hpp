@@ -5,31 +5,28 @@
 
 #include "../gfx/texture.hpp"
 
+struct NoiseSettings{
+    float strength = 1.0f;
+    int octave = 1;
+    float amplitude = 1.0;
+    float frequency = 1.0;
+    float persistence = 1.0;
+    float lucanarity = 1.0;
+};
 
 class Noise{
     public:
-        Noise(int _width, int _height, int _octave = 1, float amplitude = 1.0f,
-              float _frequency = 1.0f, float _persistence = 1.0f, float lucanarity = 1.0f,
-              float offsetx = 0.0f, float offsety = 0.0f, int seed = 0);
-        int width, height;
-        int octave;
-        float amplitude;
-        float frequency;
-        float persistence;
-        float lucanarity;
-        float offsetx;
-        float offsety;
-        int seed;
+        NoiseSettings noiseSettings;
 
-        float* generatePerlinNoiseMap();
+        Noise() {};
+        Noise(NoiseSettings &noiseSettings);
 
-        Texture getPerlinNoiseMapTexture();
-    private:
-        float noise2D(int x, int y);
+        float noise2D(float x, float y);
+        float noise3D(float x, float y, float z);
         float lerpNoise2D(float x, float y);
+        float lerpNoise3D(float x, float y, float z);
         float perlinNoise2D(float x, float y);
-        unsigned int* getNoiseMapColor(float* noise);
-
+        float perlinNoise3D(float x, float y, float z);
 };
 
 

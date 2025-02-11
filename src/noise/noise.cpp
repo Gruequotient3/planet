@@ -13,31 +13,24 @@
 #define lerp(a, b, t) (a + t * (b - a))
 #define inverseLerp(a, b, t) ((t - a) / (b - a))
 
-Noise::Noise(int _width, int _height, int _octave, float _amplitude,
-             float _frequency, float _persistence, float _lucanarity,
-             float _offsetx, float _offsety, int _seed){
+Noise::Noise(NoiseSettings &noiseSettings) : noiseSettings{noiseSettings}{};
 
-    width = _width; height = _height;
-    octave = _octave;
-    amplitude = _amplitude;
-    frequency = _frequency;
-    persistence = _persistence;
-    lucanarity = _lucanarity;
-    offsetx = _offsetx;
-    offsety = _offsety;
-    seed = _seed;
-}
-
-float Noise::noise2D( int x, int y ){
+float Noise::noise2D(float x, float y){
     int n = x + y * 257;
     n = (n<<13) ^ n;
     return ( 1.0 - ( (n * (n * n * 15731 + 789221) + 1376312589) &
-    0x7fffffff) / 1073741824.0);
+    0x7fffffff) / 1073741824.0f);
 }
 
+float Noise::noise3D(float x, float y, float z){
+    int n = x + y * 257 + z * 757;
+    n = (n<<13) ^ n;
+    return ( 1.0 - ( (n * (n * n * 15731 + 789221) + 1376312589) &
+    0x7fffffff) / 1073741824.0f);
+}
 
 float Noise::lerpNoise2D(float x, float y){
-    int xi, yi;
+    float xi, yi;
     float xf, yf;
     float l00, l01, l10, l11;
     float l0, l1;
@@ -59,65 +52,76 @@ float Noise::lerpNoise2D(float x, float y){
     return lerp(l0, l1, yf);
 }
 
+float Noise::lerpNoise3D(float x, float y, float z){
+    float xi, yi, zi;
+    float xf, yf, zf;
+    float l000, l001, l010, l011, l100, l101, l110, l111;
+    float l00, l01, l10, l11;
+    float l0, l1;
+
+    xi = x >= 0 ? (int) x : (int) x - 1;
+    xf = x - (float) xi;
+
+    yi = y >= 0 ? (int) y : (int) y - 1;
+    yf = y - (float) yi;
+
+    zi = z >= 0 ? (int) z : (int) z - 1;
+    zf = z - (float)zi;
+
+    l000 = noise3D(xi, yi, zi);
+    l001 = noise3D(xi+1, yi, zi);
+    l010 = noise3D(xi, yi+1, zi);
+    l011 = noise3D(xi+1, yi+1, zi);
+    l100 = noise3D(xi, yi, zi+1);
+    l101 = noise3D(xi+1, yi, zi+1);
+    l110 = noise3D(xi, yi+1, zi+1);
+    l111 = noise3D(xi+1, yi+1, zi+1);
+
+    l00 = lerp(l000, l001, xf);
+    l01 = lerp(l010, l011, xf);
+    l10 = lerp(l100, l101, xf);
+    l11 = lerp(l110, l111, xf);
+
+    l0 = lerp(l00, l01, yf);
+    l1 = lerp(l10, l11, yf);
+
+    return lerp(l0, l1, zf);
+}
+
 float Noise::perlinNoise2D(float x, float y){
-    float r = 0.0f;
-    float f = frequency;
-    float amplitude = 1.0f;
-    float dx = x, dy = y;
-    for(int i = 0; i < octave; i++)
-    {
-        r += lerpNoise2D(dx * f, dy * f) * amplitude;
-        dx *= lucanarity;
-        dy *= lucanarity;
-        amplitude *= persistence;
+    float noiseValue = 0;
+    float frequency = noiseSettings.frequency;
+    float amplitude = noiseSettings.amplitude;
+
+    for (int i = 0; i < noiseSettings.octave; ++i){
+        float xf = x * frequency;
+        float yf = y * frequency;
+        float v = lerpNoise2D(xf, yf);
+        noiseValue += (v + 1) * 0.5 * amplitude;
+        frequency *= noiseSettings.lucanarity;
+        amplitude *= noiseSettings.persistence;
     }
-    if (amplitude == 1.0f)
-        amplitude += 0.0000001;
-    float geoLim = (1 - persistence) / (1 - amplitude);
-    return (r * geoLim + 1.0f) / 2.0f;
-}
-
-float* Noise::generatePerlinNoiseMap(){
-    srand(seed);
-    float randOffsetx = rand() % 20000 - 10000;
-    float randOffsety = rand() % 20000 - 10000;
-
-    float* noise = new float [width * height];
-    for (int y = 0; y < height; ++y){
-        int dy = y + offsety + randOffsety;
-        for (int x = 0; x < width; ++x){
-            int dx = x + offsetx + randOffsetx;
-            float noiseValue = (perlinNoise2D((float)dx, (float) dy));
-            noise[y * width + x] = noiseValue;
-        }
-    }
-
-    for (int i = 0, wh = width * height; i < wh; ++i){
-        noise[i] = inverseLerp(0, 1, noise[i]);
-    }
-    return noise;
-}
-
-Texture Noise::getPerlinNoiseMapTexture(){
-    float* noise = generatePerlinNoiseMap();
-    unsigned int* image = getNoiseMapColor(noise);
-
-    Texture noiseTexture = Texture(image, width, height);
-    delete image;
-    return noiseTexture;
+    return noiseValue * noiseSettings.strength;
 }
 
 
+float Noise::perlinNoise3D(float x, float y, float z){
+    float noiseValue = 0;
+    float frequency = noiseSettings.frequency;
+    float amplitude = noiseSettings.amplitude;
 
-unsigned int* Noise::getNoiseMapColor(float* noise){
-    unsigned int* image = new unsigned int[width * height];
-    for (int i = 0, wh = width * height; i < wh; ++i){
-        unsigned char noiseValue = (unsigned char)lerp(0.0, 255.0, noise[i]);
-        image[i] = (((GLuint)noiseValue) << 24 | ((GLuint)noiseValue) << 16 |
-                 ((GLuint)noiseValue) << 8 | ((GLuint)255) << 0);
+    for (int i = 0; i < noiseSettings.octave; ++i){
+        float xf = x * frequency;
+        float yf = y * frequency;
+        float zf = z * frequency;
+        float v = lerpNoise3D(xf, yf, zf);
+        noiseValue += (v + 1) * 0.5 * amplitude;
+        frequency *= noiseSettings.lucanarity;
+        amplitude *= noiseSettings.persistence;
     }
-    return image;
+    return noiseValue * noiseSettings.strength;
 }
+
 
 
 
