@@ -17,41 +17,44 @@
 #include "util/camera.hpp"
 #include "util/direction.hpp"
 #include "noise/noise.hpp"
+#include "world/planet.hpp"
 
-void frameBufferSizeCallBack(GLFWwindow* window, int width, int height);
-void mouseCallback(GLFWwindow* window, double xpos, double ypos);
-void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+static int Loop();
 
-void UpdateDeltaTime();
+static void frameBufferSizeCallBack(GLFWwindow* window, int width, int height);
+static void mouseCallback(GLFWwindow* window, double xpos, double ypos);
+static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
-void processInput(GLFWwindow* window);
+static void UpdateDeltaTime();
 
-float deltaTime = 0.0f;
-float cameraSpeed = 4.0f;
+static void processInput(GLFWwindow* window);
 
-bool firstMouse = true;
-float lastX;
-float lastY;
+static float deltaTime = 0.0f;
+static float cameraSpeed = 4.0f;
 
-Camera camera = Camera();
+static bool firstMouse = true;
+static float lastX;
+static float lastY;
 
-const unsigned int tempindices[] = {0, 1, 3, 3, 1, 2};
+static Camera camera = Camera();
 
-const float tempvertices[] = {
-    -1, -1, -1,
-     1, -1, -1,
-     1,  1, -1,
-    -1,  1, -1,
-};
+static const glm::vec3 lightPos = glm::vec3(0.0f, 5.0f, 3.0f);
+static const glm::vec3 lightColor = glm::vec3(1.0f);
+static const glm::vec3 color = glm::vec3(0.1f, 0.2f, 0.6f);
+
 
 int main(){
-
     // Initialise GLFW
     if (!glfwInit()){
         std::cout << "Failed to initialise GLFW" << std::endl;
         return -1;
     }
+    int loop = Loop();
+    glfwTerminate();
+    return loop;
+}
 
+int Loop(){
 
     // OpenGL context parameters
     glfwWindowHint(GLFW_SAMPLES, 4);
@@ -66,7 +69,6 @@ int main(){
 
     if (!window){
         std::cout << "Failed to initialise OpenGL Context" << std::endl;
-        glfwTerminate();
         return -1;
     }
     glfwMakeContextCurrent(window);
@@ -84,20 +86,8 @@ int main(){
 
     Shader shader = Shader("./res/shaders/shader.vert", "./res/shaders/shader.frag");
 
-    std::vector<Vertex> vertices;
-    std::vector<unsigned int> indices;
-    for (int i = 0; i < sizeof(tempindices) / sizeof(unsigned int); ++i){
-        indices.push_back(tempindices[i]);
-    }
-    for (int i = 0; i < sizeof(tempvertices) / sizeof(float) / 3; ++i){
-        Vertex vertex;
-        vertex.position = glm::vec3(tempvertices[i*3], tempvertices[i*3+1], tempvertices[i*3+2]);
-        vertex.normal = glm::vec3(0.0f, 0.0f, 0.0f);
-        vertex.texCoord = glm::vec2(0.0f, 0.0f);
-        vertices.push_back(vertex);
-    }
-
-    Mesh mesh {vertices, indices};
+    NoiseSettings noiseSettings{0.51f, 5, 1.0f, 0.93f, 0.5f, 4.39f};
+    Planet planet{noiseSettings, 255, 1.75f};
 
     // Hide Cursor
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -107,7 +97,10 @@ int main(){
     glfwSetCursorPosCallback(window, mouseCallback);
     glfwSetScrollCallback(window, scrollCallback);
 
-
+    shader.use();
+    shader.setVec3("color", color);
+    shader.setVec3("lightPos", lightPos);
+    shader.setVec3("lightColor", lightColor);
     glm::mat4 model = glm::mat4(1.0f);
     shader.setMat4("model", GL_FALSE, glm::value_ptr(model));
     // Main loop
@@ -125,15 +118,14 @@ int main(){
         shader.setMat4("model", GL_FALSE, glm::value_ptr(model));
         shader.setMat4("view", GL_FALSE, camera.GetViewMatrice());
         shader.setMat4("projection", GL_FALSE, camera.GetProjectionMatrice());
-
-        mesh.Draw(shader);
+        planet.Draw(shader);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-    glfwTerminate();
     return 0;
 }
+
 
 void frameBufferSizeCallBack(GLFWwindow*, int width, int height){
     glViewport(0, 0, width, height);
