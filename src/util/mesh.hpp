@@ -23,9 +23,12 @@ class Mesh{
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
 
+        Mesh() {};
         Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
         ~Mesh();
         void GenerateMesh();
+        void Clear();
+        void RecalculateNormal();
         void Draw(Shader& shader);
 };
 
