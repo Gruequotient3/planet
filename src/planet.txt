@@ -1,0 +1,24 @@
+resolution:     256
+radius:         2
+
+enable:         1
+firstAsMask:    0
+type:           0
+strength:       0.07
+octave:         4
+amplitude:      1
+frequency:      2.5
+persistance:    0.5
+lucanarity:     4.2
+minValue:       0.9
+
+enable:         1
+firstAsMask:    1
+type:           1
+strength:       1
+octave:         4
+amplitude:      1
+frequency:      1.59
+persistance:    0.6
+lucanarity:     8
+minValue:       0.9
