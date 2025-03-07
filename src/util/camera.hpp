@@ -31,13 +31,13 @@ class Camera{
             view = glm::mat4(1.0f);
             view = glm::lookAt(position, position + front, up);
             view = glm::mat4(1.0f);
-            projection = glm::perspective(glm::radians(fov), 1920.0f / 1080.0f, 0.1f, 100.0f);
+            projection = glm::perspective(glm::radians(fov), 1920.0f / 1080.0f, 0.1f, 10000.0f);
 
         }
 
         void Update(){
             view = glm::lookAt(position, position + front, up);
-            projection = glm::perspective(glm::radians(fov), 1920.0f / 1080.0f, 0.1f, 100.0f);
+            projection = glm::perspective(glm::radians(fov), 1920.0f / 1080.0f, 0.1f, 10000.0f);
         }
 
         GLfloat * GetViewMatrice(){
