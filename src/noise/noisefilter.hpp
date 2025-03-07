@@ -6,15 +6,19 @@
 #include "noise.hpp"
 
 
+enum NoiseFilterType {SIMPLE = 0, RIDGID};
+
 class NoiseFilter{
     public:
         Noise noise;
+        int type;
+        bool enable;
+        bool useFirstLayerAsMask;
 
         NoiseFilter() {};
-        NoiseFilter(NoiseSettings &noiseSettings);
+        NoiseFilter(NoiseSettings &noiseSettings, int filterType,
+                    bool enable, bool useFirstLayerAsMask);
         float Evaluate(glm::vec3 point);
-
-
 };
 
 
