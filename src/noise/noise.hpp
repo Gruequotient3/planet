@@ -12,6 +12,7 @@ struct NoiseSettings{
     float frequency = 1.0;
     float persistence = 1.0;
     float lucanarity = 1.0;
+    float minValue = 0.0;
 };
 
 class Noise{
@@ -27,6 +28,7 @@ class Noise{
         float lerpNoise3D(float x, float y, float z);
         float perlinNoise2D(float x, float y);
         float perlinNoise3D(float x, float y, float z);
+        float ridgidPerlinNoise3D(float x, float y, float z);
 };
 
 

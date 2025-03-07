@@ -8,8 +8,8 @@
 
 #include <cmath>
 #include <iostream>
-#include <stdio.h>
 
+#define max(a, b) (a < b ? b : a)
 #define lerp(a, b, t) (a + t * (b - a))
 #define inverseLerp(a, b, t) ((t - a) / (b - a))
 
@@ -119,9 +119,32 @@ float Noise::perlinNoise3D(float x, float y, float z){
         frequency *= noiseSettings.lucanarity;
         amplitude *= noiseSettings.persistence;
     }
+    noiseValue = max(0, noiseValue - noiseSettings.minValue);
     return noiseValue * noiseSettings.strength;
 }
 
+float Noise::ridgidPerlinNoise3D(float x, float y, float z){
+    float noiseValue = 0.0f;
+    float frequency = noiseSettings.frequency;
+    float amplitude = noiseSettings.amplitude;
+    float weight = 1.0f;
+
+    for (int i = 0; i < noiseSettings.octave; ++i){
+        float xf = x * frequency;
+        float yf = y * frequency;
+        float zf = z * frequency;
+        float v = 1.0f-abs(lerpNoise3D(xf, yf, zf));
+        v *= v;
+        v *= weight;
+        weight = v;
+
+        noiseValue += (v + 1) * 0.5 * amplitude;
+        frequency *= noiseSettings.lucanarity;
+        amplitude *= noiseSettings.persistence;
+    }
+    noiseValue = max(0.0f, noiseValue - noiseSettings.minValue);
+    return noiseValue * noiseSettings.strength;
+}
 
 
 
