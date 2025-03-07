@@ -5,7 +5,9 @@
 
 #include <vector>
 
+#include "../gfx/shader.hpp"
 #include "../util/mesh.hpp"
+#include "../util/data.hpp"
 #include "../noise/noise.hpp"
 #include "../noise/noisefilter.hpp"
 #include "terrainface.hpp"
@@ -15,12 +17,19 @@
 class Planet{
     public:
         int resolution;
-        Planet(int resolution, float radius);
-        Planet(NoiseSettings noiseSettings, int resolution, float radius);
+
+        Planet(Shader &shader);
+
         void GenerateMesh();
-        void Draw(Shader& shader);
+        void Draw();
+        void SetSettingsFromData(Data &data);
+        void SetColorsFromData(Data &data);
+        void SetShader(Shader &shader);
+        void SetMinMax();
 
     private:
+        Shader &shader;
+
         ShapeSettings shapeSettings;
         TerrainFace terrainFace[TERRAINFACES];
         void Initialize();
