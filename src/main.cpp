@@ -16,6 +16,7 @@
 #include "util/mesh.hpp"
 #include "util/camera.hpp"
 #include "util/direction.hpp"
+#include "util/data.hpp"
 #include "noise/noise.hpp"
 #include "world/planet.hpp"
 
@@ -40,7 +41,6 @@ static Camera camera = Camera();
 
 static const glm::vec3 lightPos = glm::vec3(0.0f, 5.0f, 3.0f);
 static const glm::vec3 lightColor = glm::vec3(1.0f);
-static const glm::vec3 color = glm::vec3(0.1f, 0.2f, 0.6f);
 
 
 int main(){
@@ -72,7 +72,6 @@ int Loop(){
         return -1;
     }
     glfwMakeContextCurrent(window);
-
     // Initialise GLAD
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
         std::cout << "Failed to initialise GLAD" << std::endl;
@@ -81,13 +80,18 @@ int Loop(){
 
     glViewport(0, 0, 800, 600);
     glEnable(GL_DEPTH_TEST);
-    //glEnable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
 
 
     Shader shader = Shader("./res/shaders/shader.vert", "./res/shaders/shader.frag");
 
-    NoiseSettings noiseSettings{0.51f, 5, 1.0f, 0.93f, 0.5f, 4.39f};
-    Planet planet{noiseSettings, 255, 1.75f};
+    Data settingData, colorData;
+    settingData.LoadData("src/planet.txt");
+    colorData.LoadData("src/planetColor.txt");
+
+    Planet planet{shader};
+    planet.SetSettingsFromData(settingData);
+    planet.SetColorsFromData(colorData);
 
     // Hide Cursor
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -98,18 +102,26 @@ int Loop(){
     glfwSetScrollCallback(window, scrollCallback);
 
     shader.use();
-    shader.setVec3("color", color);
     shader.setVec3("lightPos", lightPos);
     shader.setVec3("lightColor", lightColor);
     glm::mat4 model = glm::mat4(1.0f);
     shader.setMat4("model", GL_FALSE, glm::value_ptr(model));
     // Main loop
+    float time = 0;
     while(!glfwWindowShouldClose(window)){
         UpdateDeltaTime();
         processInput(window);
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.0, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        if (!time){
+            if (!settingData.UpdateData()){
+                planet.SetSettingsFromData(settingData);
+            }
+            if (!colorData.UpdateData()){
+                planet.SetColorsFromData(colorData);
+            }
+        }
 
         camera.Update();
         shader.use();
@@ -118,11 +130,15 @@ int Loop(){
         shader.setMat4("model", GL_FALSE, glm::value_ptr(model));
         shader.setMat4("view", GL_FALSE, camera.GetViewMatrice());
         shader.setMat4("projection", GL_FALSE, camera.GetProjectionMatrice());
-        planet.Draw(shader);
+        planet.Draw();
 
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+        time += deltaTime;
+        if (time > 1.0f) time = 0;
     }
+    glfwDestroyWindow(window);
     return 0;
 }
 
