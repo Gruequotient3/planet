@@ -25,7 +25,7 @@ void Planet::GenerateMesh(){
 }
 
 void Planet::Draw(){
-    for (int i = 4; i < 5; ++i){
+    for (int i = 0; i < TERRAINFACES; ++i){
         terrainFace[i].mesh.Draw(shader);
     }
 }
