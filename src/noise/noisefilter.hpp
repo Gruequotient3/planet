@@ -18,7 +18,7 @@ class NoiseFilter{
         NoiseFilter() {};
         NoiseFilter(NoiseSettings &noiseSettings, int filterType,
                     bool enable, bool useFirstLayerAsMask);
-        float Evaluate(glm::vec3 point);
+        float Evaluate(glm::vec3 point, glm::vec3 offset);
 };
 
 

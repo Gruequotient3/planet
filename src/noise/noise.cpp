@@ -88,15 +88,14 @@ float Noise::lerpNoise3D(float x, float y, float z){
     return lerp(l0, l1, zf);
 }
 
-float Noise::perlinNoise2D(float x, float y){
+float Noise::perlinNoise2D(glm::vec2 point, glm::vec2 offset){
     float noiseValue = 0;
     float frequency = noiseSettings.frequency;
     float amplitude = noiseSettings.amplitude;
 
     for (int i = 0; i < noiseSettings.octave; ++i){
-        float xf = x * frequency;
-        float yf = y * frequency;
-        float v = lerpNoise2D(xf, yf);
+        glm::vec2 pf = point * frequency + offset;
+        float v = lerpNoise2D(pf.x, pf.y);
         noiseValue += (v + 1) * 0.5 * amplitude;
         frequency *= noiseSettings.lucanarity;
         amplitude *= noiseSettings.persistence;
@@ -105,17 +104,15 @@ float Noise::perlinNoise2D(float x, float y){
 }
 
 
-float Noise::perlinNoise3D(float x, float y, float z){
+float Noise::perlinNoise3D(glm::vec3 point, glm::vec3 offset){
     float noiseValue = 0;
     float frequency = noiseSettings.frequency;
     float amplitude = noiseSettings.amplitude;
 
     for (int i = 0; i < noiseSettings.octave; ++i){
-        float xf = x * frequency;
-        float yf = y * frequency;
-        float zf = z * frequency;
-        float v = lerpNoise3D(xf, yf, zf);
-        noiseValue += (v + 1) * 0.5 * amplitude;
+        glm::vec3 pf = point * frequency + offset;
+        float v = lerpNoise3D(pf.x, pf.y, pf.z);
+        noiseValue += (v + 1) * 0.5f * amplitude;
         frequency *= noiseSettings.lucanarity;
         amplitude *= noiseSettings.persistence;
     }
@@ -123,22 +120,20 @@ float Noise::perlinNoise3D(float x, float y, float z){
     return noiseValue * noiseSettings.strength;
 }
 
-float Noise::ridgidPerlinNoise3D(float x, float y, float z){
+float Noise::ridgidPerlinNoise3D(glm::vec3 point, glm::vec3 offset){
     float noiseValue = 0.0f;
     float frequency = noiseSettings.frequency;
     float amplitude = noiseSettings.amplitude;
     float weight = 1.0f;
 
     for (int i = 0; i < noiseSettings.octave; ++i){
-        float xf = x * frequency;
-        float yf = y * frequency;
-        float zf = z * frequency;
-        float v = 1.0f-abs(lerpNoise3D(xf, yf, zf));
+        glm::vec3 pf = point * frequency + offset;
+        float v = 1.0f-abs(lerpNoise3D(pf.x, pf.y, pf.z));
         v *= v;
         v *= weight;
         weight = v;
 
-        noiseValue += (v + 1) * 0.5 * amplitude;
+        noiseValue += v * amplitude;
         frequency *= noiseSettings.lucanarity;
         amplitude *= noiseSettings.persistence;
     }

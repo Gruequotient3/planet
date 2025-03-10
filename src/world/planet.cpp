@@ -5,7 +5,7 @@
 
 #include "../util/direction.hpp"
 
-#define NB_PARAMETER 12
+#define NB_PARAMETER 13
 #define NB_COLOR 16
 
 Planet::Planet(Shader &shader) : shader{shader}{};
@@ -25,7 +25,7 @@ void Planet::GenerateMesh(){
 }
 
 void Planet::Draw(){
-    for (int i = 0; i < 6; ++i){
+    for (int i = 4; i < 5; ++i){
         terrainFace[i].mesh.Draw(shader);
     }
 }
@@ -35,15 +35,16 @@ void Planet::SetSettingsFromData(Data &data){
         std::cout << "SetSettingsFromData: Not enough data for this object" << std::endl;
         return;
     }
-    int nbNoiseFilter = (int)((data.data.size()-2) / 7);
+    int nbNoiseFilter = (int)((data.data.size()-3) / 10);
 
     this->resolution = (int)data.data[0];
-    this->shapeSettings.radius = data.data[1];
+    this->shapeSettings.SetSeed((int)data.data[1]);
+    this->shapeSettings.radius = data.data[2];
     this->shapeSettings.noiseFilter.clear();
 
     NoiseSettings newNoiseSettings;
     for (int i = 0; i < nbNoiseFilter; ++i){
-        int j = i * 10 + 2;
+        int j = i * 10 + 3;
         this->shapeSettings.noiseFilter.push_back(NoiseFilter{});
         this->shapeSettings.noiseFilter[i].enable = (bool)data.data[j];
         this->shapeSettings.noiseFilter[i].useFirstLayerAsMask = (bool)data.data[j+1];

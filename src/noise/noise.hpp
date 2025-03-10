@@ -26,9 +26,9 @@ class Noise{
         float noise3D(float x, float y, float z);
         float lerpNoise2D(float x, float y);
         float lerpNoise3D(float x, float y, float z);
-        float perlinNoise2D(float x, float y);
-        float perlinNoise3D(float x, float y, float z);
-        float ridgidPerlinNoise3D(float x, float y, float z);
+        float perlinNoise2D(glm::vec2 point, glm::vec2 offset);
+        float perlinNoise3D(glm::vec3 point, glm::vec3 offset);
+        float ridgidPerlinNoise3D(glm::vec3 point, glm::vec3 offset);
 };
 
 
