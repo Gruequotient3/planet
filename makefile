@@ -35,7 +35,7 @@ libs:
 	@cd lib/glfw && cmake . && make
 	@cd lib/stb && $(CC) -c stb_image.cpp -o stb_image.o
 
-%.o: %.cpp
+%.o: %.cpp %.hpp
 	$(CC) $(CXXFLAGS) -c $< -o $@ $(LDFLAGS)
 
 clean:
