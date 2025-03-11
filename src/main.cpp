@@ -1,6 +1,4 @@
 #include <iostream>
-#include <fstream>
-#include <cmath>
 #include <vector>
 
 #include <glad/glad.h>
@@ -10,14 +8,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-
 #include "gfx/shader.hpp"
 #include "gfx/texture.hpp"
-#include "util/mesh.hpp"
 #include "util/camera.hpp"
-#include "util/direction.hpp"
-#include "util/data.hpp"
-#include "noise/noise.hpp"
 #include "world/planet.hpp"
 
 static int Loop();
@@ -37,7 +30,7 @@ static bool firstMouse = true;
 static float lastX;
 static float lastY;
 
-static Camera camera = Camera();
+static Camera camera;
 
 static const glm::vec3 lightPos = glm::vec3(0.0f, 5.0f, 3.0f);
 static const glm::vec3 lightColor = glm::vec3(1.0f);
@@ -78,7 +71,6 @@ int Loop(){
         return -1;
     }
 
-    glViewport(0, 0, 800, 600);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
