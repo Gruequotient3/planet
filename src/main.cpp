@@ -8,10 +8,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+
 #include "gfx/shader.hpp"
 #include "gfx/texture.hpp"
 #include "util/camera.hpp"
-#include "world/planet.hpp"
+#include "world/world.hpp"
+
 
 static int Loop();
 
@@ -30,13 +32,11 @@ static bool firstMouse = true;
 static float lastX;
 static float lastY;
 
-static Camera camera;
-
-static const glm::vec3 lightPos = glm::vec3(0.0f, 5.0f, 3.0f);
-static const glm::vec3 lightColor = glm::vec3(1.0f);
-
+static int width = 1920;
+static int height = 1080;
 
 int main(){
+    World::camera = width / (float)height;
     // Initialise GLFW
     if (!glfwInit()){
         std::cout << "Failed to initialise GLFW" << std::endl;
@@ -48,7 +48,6 @@ int main(){
 }
 
 int Loop(){
-
     // OpenGL context parameters
     glfwWindowHint(GLFW_SAMPLES, 4);
     glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
@@ -58,7 +57,7 @@ int Loop(){
 
     // Initialise OpenGL context
     GLFWwindow* window;
-    window = glfwCreateWindow(1920, 1080, "Hello World !", NULL, NULL);
+    window = glfwCreateWindow(width, height, "Hello World !", NULL, NULL);
 
     if (!window){
         std::cout << "Failed to initialise OpenGL Context" << std::endl;
@@ -71,19 +70,11 @@ int Loop(){
         return -1;
     }
 
+    glfwSwapInterval(1);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
-
-    Shader shader = Shader("./res/shaders/shader.vert", "./res/shaders/shader.frag");
-
-    Data settingData, colorData;
-    settingData.LoadData("src/planet.txt");
-    colorData.LoadData("src/planetColor.txt");
-
-    Planet planet{shader};
-    planet.SetSettingsFromData(settingData);
-    planet.SetColorsFromData(colorData);
+    World world;
 
     // Hide Cursor
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -93,42 +84,20 @@ int Loop(){
     glfwSetCursorPosCallback(window, mouseCallback);
     glfwSetScrollCallback(window, scrollCallback);
 
-    shader.use();
-    shader.setVec3("lightPos", lightPos);
-    shader.setVec3("lightColor", lightColor);
-    glm::mat4 model = glm::mat4(1.0f);
-    shader.setMat4("model", GL_FALSE, glm::value_ptr(model));
     // Main loop
-    float time = 0;
     while(!glfwWindowShouldClose(window)){
+
         UpdateDeltaTime();
         processInput(window);
         glClearColor(0.0, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        if (!time){
-            if (!settingData.UpdateData()){
-                planet.SetSettingsFromData(settingData);
-            }
-            if (!colorData.UpdateData()){
-                planet.SetColorsFromData(colorData);
-            }
-        }
-
-        camera.Update();
-        shader.use();
-
-        model = glm::mat4(1.0f);
-        shader.setMat4("model", GL_FALSE, glm::value_ptr(model));
-        shader.setMat4("view", GL_FALSE, camera.GetViewMatrice());
-        shader.setMat4("projection", GL_FALSE, camera.GetProjectionMatrice());
-        planet.Draw();
+        world.camera.Update();
+        world.Update(deltaTime, UPDATE_DATA);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
 
-        time += deltaTime;
-        if (time > 1.0f) time = 0;
     }
     glfwDestroyWindow(window);
     return 0;
@@ -137,6 +106,7 @@ int Loop(){
 
 void frameBufferSizeCallBack(GLFWwindow*, int width, int height){
     glViewport(0, 0, width, height);
+    World::camera.ratio = width / (float)height;
 }
 
 void mouseCallback(GLFWwindow* , double xpos, double ypos){
@@ -159,33 +129,33 @@ void mouseCallback(GLFWwindow* , double xpos, double ypos){
     xoffset *= sensitivity * deltaTime;
     yoffset *= sensitivity * deltaTime;
 
-    camera.yaw += xoffset;
-    camera.pitch += yoffset;
+    World::camera.yaw += xoffset;
+    World::camera.pitch += yoffset;
 
-    if (camera.pitch > 89.0f){
-        camera.pitch = 89.0f;
+    if (World::camera.pitch > 89.0f){
+        World::camera.pitch = 89.0f;
     }
-    if (camera.pitch < -89.0f){
-        camera.pitch = -89.0f;
+    if (World::camera.pitch < -89.0f){
+        World::camera.pitch = -89.0f;
     }
 
     glm::vec3 direction;
-    direction.x = cos(glm::radians(camera.yaw)) * cos(glm::radians(camera.pitch));
-    direction.y = sin(glm::radians(camera.pitch));
-    direction.z = sin(glm::radians(camera.yaw)) * cos(glm::radians(camera.pitch));
+    direction.x = cos(glm::radians(World::camera.yaw)) * cos(glm::radians(World::camera.pitch));
+    direction.y = sin(glm::radians(World::camera.pitch));
+    direction.z = sin(glm::radians(World::camera.yaw)) * cos(glm::radians(World::camera.pitch));
 
-    camera.front = glm::normalize(direction);
+    World::camera.front = glm::normalize(direction);
 
 }
 
 void scrollCallback(GLFWwindow*, double, double yoffset){
 
-    camera.fov -= (float)yoffset;
-    if (camera.fov < 1.0f){
-        camera.fov = 1.0f;
+    World::camera.fov -= (float)yoffset;
+    if (World::camera.fov < 1.0f){
+        World::camera.fov = 1.0f;
     }
-    if (camera.fov > 90.0f){
-        camera.fov = 90.0f;
+    if (World::camera.fov > 90.0f){
+        World::camera.fov = 90.0f;
     }
 }
 
@@ -193,7 +163,7 @@ void scrollCallback(GLFWwindow*, double, double yoffset){
 void UpdateDeltaTime(){
     static float lastFrame = 0.0f;
     float currentFrame = glfwGetTime();
-    deltaTime = currentFrame - lastFrame;
+    deltaTime = ceilf((currentFrame - lastFrame) * 1000) / 1000;
     lastFrame = currentFrame;
 }
 
@@ -204,21 +174,23 @@ void processInput(GLFWwindow* window){
 
     float velocity = cameraSpeed * deltaTime;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
-        camera.position +=  camera.front * velocity;
+        World::camera.position +=  World::camera.front * velocity;
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
-        camera.position -=  camera.front * velocity;
+        World::camera.position -=  World::camera.front * velocity;
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
-        camera.position -= glm::normalize(glm::cross(camera.front, camera.up)) * velocity;
+        World::camera.position -=
+            glm::normalize(glm::cross(World::camera.front, World::camera.up)) * velocity;
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
-        camera.position += glm::normalize(glm::cross(camera.front, camera.up)) * velocity;
+        World::camera.position +=
+            glm::normalize(glm::cross(World::camera.front, World::camera.up)) * velocity;
     }
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS){
-        camera.position += camera.up * velocity;
+        World::camera.position += World::camera.up * velocity;
     }
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS){
-        camera.position -= camera.up * velocity;
+        World::camera.position -= World::camera.up * velocity;
     }
 }
