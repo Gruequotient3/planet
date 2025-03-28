@@ -1,8 +1,7 @@
 PROG = main
 
 CC = g++
-CXXFLAGS = -Wall -Wextra -O3 -std=c++11
-
+CXXFLAGS = -Wall -Wextra -O3
 CXXFLAGS += -Ilib/glad/include
 CXXFLAGS += -Ilib/glm/
 CXXFLAGS += -Ilib/glfw/include
