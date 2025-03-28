@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "../gfx/shader.hpp"
-#include "../util/mesh.hpp"
+#include "../util/camera.hpp"
 #include "../util/data.hpp"
 #include "../noise/noise.hpp"
 #include "../noise/noisefilter.hpp"
@@ -14,9 +14,22 @@
 
 #define TERRAINFACES 6
 
+enum PlanetType {PLANET, SATELITE, SUN};
+
+struct ColorSettings{
+    std::vector<float> colors;
+    std::vector<float> heights;
+};
+
 class Planet{
     public:
         int resolution;
+        glm::vec3 position;
+
+        // Simulation parameters
+        PlanetType type;
+        float rotationSpeed;
+        float revolutionSpeed;
 
         Planet(Shader &shader);
 
@@ -31,7 +44,12 @@ class Planet{
         Shader &shader;
 
         ShapeSettings shapeSettings;
+        ColorSettings colorSettings;
+
+        float min, max;
+
         TerrainFace terrainFace[TERRAINFACES];
+
         void Initialize();
 };
 
