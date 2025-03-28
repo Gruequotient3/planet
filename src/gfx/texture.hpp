@@ -13,8 +13,10 @@ class Texture{
         int width;
         int height;
 
+        Texture();
         Texture(const char* imagePath, GLenum format);
-        Texture(unsigned int* pixels, int _width, int _height);
+
+        void LoadTexture(const char* imagePath, GLenum format);
 };
 
 #endif
