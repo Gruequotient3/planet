@@ -14,6 +14,7 @@ class ShapeSettings{
         float radius;
         int seed;
         glm::vec3 offset;
+
         std::vector<NoiseFilter> noiseFilter;
 
         ShapeSettings(float radius = 1.0f, int seed = 0) :
@@ -46,7 +47,6 @@ class ShapeSettings{
                                rand() % 20000 - 10000,
                                rand() % 20000 - 10000);
         }
-
 };
 
 class TerrainFace{
@@ -59,7 +59,6 @@ class TerrainFace{
 
         TerrainFace() {}
         TerrainFace(ShapeSettings &shapeSettings, int resolution, glm::vec3 localUp);
-        void Initialize(int resolution, glm::vec3 localUp);
         void Initialize(int resolution, glm::vec3 localUp, ShapeSettings &shapeSettings);
         void ConstructMesh();
 
