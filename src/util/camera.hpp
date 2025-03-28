@@ -18,26 +18,32 @@ class Camera{
         glm::vec3 front;
         glm::vec3 up;
 
-        Camera(glm::vec3 _position = glm::vec3(0.0f, 0.0f, 3.0f), float _yaw = -90.0f,
-               float _pitch = 0.0f, float _fov = 90.0f){
-            position = _position;
-            front = glm::vec3(0.0f, 0.0f, -1.0f);
+        float ratio;
+
+        Camera(float ratio = 16.0f / 9.0f,
+                glm::vec3 position = glm::vec3(0.0f, 0.0f, 3.0f), float yaw = -90.0f,
+                float pitch = 0.0f, float fov = 90.0f){
+
+            this->ratio = ratio;
+            this->position = position;
+            this->front = glm::vec3(0.0f, 0.0f, -1.0f);
             up = glm::vec3(0.0f, 1.0f, 0.0f);
 
-            yaw = _yaw;
-            pitch = _pitch;
-            fov = _fov;
+            this->yaw = yaw;
+            this->pitch = pitch;
+            this->fov = fov;
 
             view = glm::mat4(1.0f);
             view = glm::lookAt(position, position + front, up);
             view = glm::mat4(1.0f);
-            projection = glm::perspective(glm::radians(fov), 1920.0f / 1080.0f, 0.1f, 10000.0f);
-
+            projection = glm::perspective(glm::radians(fov),
+                                          ratio, 0.1f, 10000.0f);
         }
 
         void Update(){
             view = glm::lookAt(position, position + front, up);
-            projection = glm::perspective(glm::radians(fov), 1920.0f / 1080.0f, 0.1f, 10000.0f);
+            projection = glm::perspective(glm::radians(fov),
+                                          ratio, 0.1f, 10000.0f);
         }
 
         GLfloat * GetViewMatrice(){
