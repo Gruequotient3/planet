@@ -68,9 +68,11 @@ void World::Init(){
 
 void World::Update(float deltaTime, UpdateMode updateMode){
     static float theta = 0.0f;
+    static float globalTime = 0.0f;
     static float time = 0.0f;
     glm::mat4 model;
 
+    planetShader.setFloat("time", globalTime);
     // Update Data
     if (updateMode == UPDATE_DATA){
         if (time >= 0.5f){
@@ -102,7 +104,10 @@ void World::Update(float deltaTime, UpdateMode updateMode){
         planets[i].Draw();
     }
     theta += deltaTime * 360.0f;
-    if (updateMode != NO_UPDATE) time += deltaTime;
+    if (updateMode != NO_UPDATE) {
+        time += deltaTime;
+        globalTime += deltaTime;
+    }
 }
 
 #endif

@@ -11,10 +11,10 @@
 enum UpdateMode {NO_UPDATE, UPDATE_DATA};
 
 static const std::string dataSettingPaths[]{
-    "res/planetConfig/settings/p1.txt", "res/planetConfig/color/p1.txt",
-    "res/planetConfig/settings/p2.txt", "res/planetConfig/color/p2.txt",
-    "res/planetConfig/settings/p3.txt", "res/planetConfig/color/p3.txt",
-    "res/planetConfig/settings/p4.txt", "res/planetConfig/color/p4.txt",
+    "res/planetConfig/setting/p1.txt", "res/planetConfig/color/p1.txt",
+    //"res/planetConfig/setting/p2.txt", "res/planetConfig/color/p2.txt",
+    //"res/planetConfig/setting/p3.txt", "res/planetConfig/color/p3.txt",
+    //"res/planetConfig/setting/p4.txt", "res/planetConfig/color/p4.txt",
 };
 
 static const glm::vec3 lightPos = glm::vec3(0.0f, 0.0f, 0.0f);
