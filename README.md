@@ -19,3 +19,6 @@ make libs && make
 make
 ./main
 ```
+
+## Credits
+Music : https://modarchive.org/index.php?request=view_by_moduleid&query=179349#texts

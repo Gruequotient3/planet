@@ -1,0 +1,17 @@
+resolution:     256
+seed:           2
+radius:         1.5
+rotSpeed:       0.2
+revSpeed:       0.05
+
+enable:         1
+usefirstAsMask: 0
+type:           0
+strength:       0.3
+octave:         4
+amplitude:      1
+frequency:      0.2 
+persistance:    0.4
+lucanarity:     5
+minValue:       0
+
