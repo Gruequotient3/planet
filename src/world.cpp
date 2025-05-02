@@ -11,6 +11,8 @@
 #include <cstdlib>
 #include <string>
 
+#include <SDL_ttf.h>
+
 
 #define lerp(a, b, t) (a + t * (b - a))
 #define inverselerp(a, b, t) ((t - a) / (b - a))
@@ -43,12 +45,15 @@ const static glm::vec3 outcoldeadsun{0.06f, 0.33f, 0.67f};
 static float sunLightStrength = -1.0f;
 static float sunStrength = 0.35f;
 
+
 Camera World::camera = Camera{};
 World::World() : planetShader{Shader{"res/planet.vert", "res/planet.frag"}},
-                outlineShader{Shader{"res/planet.vert", "res/outlinePlanet.frag"}}
+                outlineShader{Shader{"res/planet.vert", "res/outlinePlanet.frag"}},
+                creditShader{Shader{"res/planet.vert", "res/text.frag"}}
 {
     planets = nullptr;
     datas = nullptr;
+    textId = 0;
     Init();
 }
 
@@ -103,7 +108,7 @@ void World::Init(){
     Data outlineSunData;
     new (outlineSun) Planet{outlineShader};
 
-    outlineSunData.LoadData("res//outlineSunSetting.txt");
+    outlineSunData.LoadData("res/outlineSunSetting.txt");
     outlineSun->SetSettingsFromData(outlineSunData);
     outlineSun->position = glm::vec3(0.0);
 
@@ -119,7 +124,59 @@ void World::Init(){
     planetShader.setFloat("sunStrength", sunStrength);
 
     InitMusic("res/modtomit_-_sad_machine.it");
+    textMesh = Mesh::GetQuadMesh();
+    textMesh.GenerateMesh();
+    InitText(
+        "Demo created with OpenGL, Glad, GLFW, GLM, SDL\n\n" 
+        "Music : modtomit - sad_machine (https://modarchive.org/index.php?request=view_by_moduleid&query=179349#texts)"
+    ); 
+}
 
+void World::InitText(const char * text) {
+    static int firstTime = 1;
+    SDL_Color c = {255, 255, 0, 255};
+    SDL_Surface * d, * s;
+    TTF_Font * font = NULL;
+    if(firstTime) {
+      /* initialisation de la bibliothèque SDL2 ttf */
+      if(TTF_Init() == -1) {
+        fprintf(stderr, "TTF_Init: %s\n", TTF_GetError());
+        exit(2);
+      }
+      firstTime = 0;
+    }
+    if(textId == 0) {
+      /* initialisation de la texture côté OpenGL */
+      glGenTextures(1, &textId);
+      glBindTexture(GL_TEXTURE_2D, textId);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    }
+    /* chargement de la font */
+    if( !(font = TTF_OpenFont("res/DejaVuSans-Bold.ttf", 128)) ) {
+      fprintf(stderr, "TTF_OpenFont: %s\n", TTF_GetError());
+      return;
+    }
+    /* création d'une surface SDL avec le texte */
+    d = TTF_RenderUTF8_Blended_Wrapped(font, text, c, 2048);
+    if(d == NULL) {
+      TTF_CloseFont(font);
+      fprintf(stderr, "Erreur lors du TTF_RenderText\n");
+      return;
+    }
+    /* copie de la surface SDL vers une seconde aux spécifications qui correspondent au format OpenGL */
+    s = SDL_CreateRGBSurface(0, d->w, d->h, 32, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
+    assert(s);
+    SDL_BlitSurface(d, NULL, s, NULL);
+    SDL_FreeSurface(d);
+    /* transfert vers la texture OpenGL */
+    glBindTexture(GL_TEXTURE_2D, textId);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, s->w, s->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, s->pixels);
+    SDL_FreeSurface(s);
+    TTF_CloseFont(font);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void World::Update(float deltaTime, UpdateMode updateMode){
@@ -152,7 +209,6 @@ void World::Update(float deltaTime, UpdateMode updateMode){
         }
     }
     
-
     if (globalTime < 4.0f){
         float percent = inverselerp(0.0f, 4.0f, globalTime);
         Mix_VolumeMusic(lerp(0.0f, (float)MIX_MAX_VOLUME, percent));
@@ -202,7 +258,6 @@ void World::Update(float deltaTime, UpdateMode updateMode){
         }
     }
     
-
     if (globalTime < 55.55f){
         glClearColor(0.0, 0.0, 0.0, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -218,7 +273,6 @@ void World::Update(float deltaTime, UpdateMode updateMode){
             planets[i].Draw();
         }
 
-
         outlineShader.use();
         outlineShader.setVec3("cameraPos", camera.position);
         model = glm::mat4(1.0f);
@@ -226,10 +280,25 @@ void World::Update(float deltaTime, UpdateMode updateMode){
         model = glm::translate(model, outlineSun->position);
         outlineShader.setMat4("model", GL_FALSE, glm::value_ptr(model));
         outlineSun->Draw();
+        glEnable(GL_DEPTH_TEST);
     }
     else{
         glClearColor(1.0, 1.0, 1.0, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        camera.position = glm::vec3(0.0, 0.0, 4.0f);
+        camera.front = glm::vec3(0.0, 0.0, -1.0f);
+        creditShader.use();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, textId);
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, outlineSun->position);
+        model = glm::scale(model, glm::vec3(10.0f, 5.0f, 1.0f));
+        creditShader.setMat4("model", GL_FALSE, glm::value_ptr(model));
+        creditShader.setMat4("view", GL_FALSE, camera.GetViewMatrice());
+        creditShader.setMat4("projection", GL_FALSE, camera.GetProjectionMatrice());
+        creditShader.setVec3("color", glm::vec3(0.0f, 0.0f, 0.0f));
+        textMesh.Draw(creditShader);
     }
 
     theta += deltaTime * 360.0f;

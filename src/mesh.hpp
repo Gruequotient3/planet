@@ -1,11 +1,12 @@
 #ifndef MESH_HPP
 #define MESH_HPP
 
-#include <vector>
+#include <glad/glad.h>
 #include <glm/glm.hpp>
+#include <vector>
+
 
 #include "shader.hpp"
-
 
 struct Vertex{
     glm::vec3 position;
@@ -14,23 +15,28 @@ struct Vertex{
 };
 
 class Mesh{
-    private:
-        unsigned int vao = 0;
-        unsigned int vbo = 0;
-        unsigned int ebo = 0;
-
     public:
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
 
-        Mesh() {};
-        Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
+        unsigned int vao;
+        unsigned int vbo;
+        unsigned int ebo;
+
+        Mesh();
         ~Mesh();
+
+        
         void GenerateMesh();
+        void DestroyMesh();
         void Clear();
         void RecalculateNormal();
-        void Draw(Shader& shader);
-    };
+
+
+        void Draw(Shader &shader);
+
+        static Mesh GetQuadMesh();
+};
 
 
 #endif

@@ -8,6 +8,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <SDL_ttf.h>
 
 #include "shader.hpp"
 #include "world.hpp"
@@ -67,7 +68,7 @@ int Loop(){
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     World world;
-    
+
     // Hide Cursor
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     
@@ -76,10 +77,8 @@ int Loop(){
 
     // Main loop
     while(!glfwWindowShouldClose(window)){
-
         UpdateDeltaTime();
         processInput(window);
-        
 
         world.camera.Update();
         world.Update(deltaTime, UPDATE_DATA);

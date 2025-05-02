@@ -21,7 +21,7 @@ class Camera{
         float ratio;
 
         Camera(float ratio = 16.0f / 9.0f,
-                glm::vec3 position = glm::vec3{0.0f, 0.0f, 3.0f}, float yaw = -90.0f,
+                glm::vec3 position = glm::vec3{0.0f, 0.0f, 10.0f}, float yaw = -90.0f,
                 float pitch = 0.0f, float fov = 90.0f){
 
             this->ratio = ratio;

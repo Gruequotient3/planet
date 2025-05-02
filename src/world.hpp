@@ -33,10 +33,16 @@ class World{
 
         Shader planetShader;
         Shader outlineShader;
+        Shader creditShader;
+
+        Mesh textMesh;
+        unsigned int textId;
 
         Mix_Music *music = NULL;
 
         void Init();
+        void InitText(const char * text);
+
         void ShowPlanet(float time, int indexPlanet, float timeStart, float timeEnd, float distanceCoeff);
         void InitMusic(const char *musicPath);
         
