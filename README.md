@@ -5,6 +5,11 @@ Projets which create planets from procedural generation with only openGL
 ## Git
 https://github.com/Gruequotient3/planet
 
+## Needed
+- SDL2
+    - \+ sdl2_ttf
+    - \+ sdl2_mixer 
+
 ## Building 
 
 ### Unix
