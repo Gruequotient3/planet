@@ -10,10 +10,11 @@ CXXFLAGS += $(shell sdl2-config --cflags)
 
 LDFLAGS = -lm
 LDFLAGS += -lX11 -lpthread -lXrandr -lXi -ldl -lSDL2_ttf
-LDFLAGS += -lglad -lglfw3 -lglm
+LDFLAGS += -lglad -lglfw3 -lglm -lstb_image
 LDFLAGS += -Llib/glad/
 LDFLAGS += -Llib/glfw/src/
 LDFLAGS += -Llib/glm/glm/
+LDFLAGS += -Llib/stb
 LDFLAGS += $(shell sdl2-config --libs) -lSDL2_mixer
 
 # Traitement automatique (ne pas modifier)
