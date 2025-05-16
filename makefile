@@ -51,8 +51,10 @@ $(PROG): $(OBJ)
 	$(CC) -o main $(OBJ) $(LDFLAGS)
 
 libs:
+	@cd lib/glad && $(CC) -o src/glad.o -Iinclude -c src/glad.c && ar rcs libglad.a src/glad.o
 	@cd lib/glm && cmake . -DCGLM_STATIC=ON && make
 	@cd lib/glfw && cmake . && make
+	@cd lib/stb && $(CC) -c stb_image.cpp -o stb_image.o && ar rcs libstb_image.a stb_image.o
 
 %.o: %.cpp %.hpp
 	$(CC) $(CXXFLAGS) -c $< -o $@
